@@ -1,0 +1,120 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.java.explore</groupId>
+		<artifactId>JavaSamples</artifactId>
+		<version>1.0</version>
+	</parent>
+	<artifactId>JPMSMultiRelease</artifactId>
+	<description>
+		Demonstrates JPMS multi release
+		- Setup the project with JDK 8 in IDE and have src/main/java source with default compiled to JDK 8
+		- Add src/main/java-11 source package with JDK 11 source
+		- package and class naming should be same in src/main/java and src/main/java-11. So it switches between class at runtime
+		- In pom add ant plugin to compile the source with Java 11 [which is being picked by setting JAVA_HOME to java 11]
+		  [export JAVA_HOME=/d/software/installed/jdk-11.0.1_windows-x64_bin/jdk-11.0.1]
+		- Below is the exec part
+			
+		  1. mvn clean package -Pcompile-11	
+		  
+		  2. JDK 8 check
+		  	 /d/software/installed/jdk8/bin/java -jar target/JPMSMultiRelease.jar
+			 output : hello java 8
+			 
+		  3. JDK 11 check
+		  	 /d/software/installed/jdk-11.0.1_windows-x64_bin/jdk-11.0.1/bin/java -jar target/JPMSMultiRelease.jar
+			 output : hello java 11 from var
+	</description>
+
+	<properties>
+		<java11.sourceDirectory>${project.basedir}\src\main\java-11</java11.sourceDirectory>
+		<java11.build.outputDirectory>${project.build.directory}\classes-java-11</java11.build.outputDirectory>
+		<java.version>8</java.version>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Multi-Release>true</Multi-Release>
+							<Main-Class>com.java.explore.javasamples.jpms.multirelease.module.main.MainRunner</Main-Class>
+						</manifestEntries>
+					</archive>
+					<finalName>JPMSMultiRelease</finalName>
+				</configuration>
+			</plugin>
+			<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>2.3.2</version>
+					<configuration>
+						<source>${java.version}</source>
+						<target>${java.version}</target>
+					</configuration>
+				</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<profile>
+			<id>compile-11</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.8</version>
+						<executions>
+							<execution>
+								<id>compile-java11</id>
+								<phase>compile</phase>
+								<configuration>
+									
+									<tasks>
+										<mkdir dir="${java11.build.outputDirectory}" />
+										<javac srcdir="${java11.sourceDirectory}"
+											destdir="${java11.build.outputDirectory}"
+											classpath="${project.build.outputDirectory}"
+											includeantruntime="false" />
+									</tasks>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>2.6</version>
+						<executions>
+							<execution>
+								<id>copy-resources</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.outputDirectory}/META-INF/versions/11</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${java11.build.outputDirectory}</directory>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

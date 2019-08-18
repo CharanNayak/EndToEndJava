@@ -7,4 +7,7 @@
   </parent>
   <artifactId>DesignPatterns</artifactId>
   <packaging>pom</packaging>
+  <modules>
+  	<module>StructureDesignPatterns</module>
+  </modules>
 </project>

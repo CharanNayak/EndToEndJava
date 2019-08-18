@@ -7,4 +7,7 @@
   </parent>
   <artifactId>JavaSamples</artifactId>
   <packaging>pom</packaging>
+  <modules>
+  	<module>JPMSMultiRelease</module>
+  </modules>
 </project>
